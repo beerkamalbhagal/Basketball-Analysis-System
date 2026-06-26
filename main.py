@@ -6,20 +6,26 @@ def main():
     # Read video   
     video_frames = read_video("input_videos/video_1.mp4")
 
-    # Initialize player tracker
+    # Initialize trackers
     player_tracker = PlayerTracker("models/player_detector.pt")
+    ball_tracker = BallTracker("models/ball_detector.pt")
 
     # Run trackers
     player_tracks = player_tracker.get_object_tracks(video_frames,
                                                      read_from_stub=True,
                                                     stub_path="stubs/player_tracks_stubs.pkl")
     
-    ball_tracker = BallTracker("models/ball_detector.pt")
     ball_tracks = ball_tracker.get_object_tracks(video_frames,
                                                   read_from_stub=True,
                                                   stub_path="stubs/ball_tracks_stubs.pkl")
+    
+    # Remove wrong detections
+    ball_tracks = ball_tracker.remove_wrong_detections(ball_tracks)
+    # Interpolate ball positions
+    ball_tracks = ball_tracker.interpolate_ball_positions(ball_tracks)
+
     # Draw output
-    # Initialize player tracks drawer
+    # Initialize drawers
     player_tracks_drawer = PlayerTracksDrawer()
     ball_tracks_drawer = BallTracksDrawer()
 
