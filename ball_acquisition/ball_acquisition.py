@@ -124,12 +124,15 @@ class BallAcquisitionDetector:
             best_player_id = self.find_best_candidate_for_possession(ball_center, player_tracks[frame_num],ball_bbox)
 
             if best_player_id != -1:
-                number_of_consecutive_frames = consecutive_possession_count.get(best_player_id, 0) + 1
-                consecutive_possession_count = {best_player_id:number_of_consecutive_frames}
+                consecutive_possession_count[best_player_id] = (
+                    consecutive_possession_count.get(best_player_id, 0) + 1
+                )
+                # Reset everyone else's streak only when a new player takes over
+                for pid in list(consecutive_possession_count.keys()):
+                    if pid != best_player_id:
+                        consecutive_possession_count[pid] = 0
 
                 if consecutive_possession_count[best_player_id] >= self.min_frames:
                     possession_list[frame_num] = best_player_id
-                else:
-                    consecutive_possession_count = {}
 
         return possession_list
